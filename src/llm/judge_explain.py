@@ -50,7 +50,7 @@ def build_course_summary(course_code, course_record):
     }
 
 
-def judge_and_explain(original_query, narrowed_codes, courses_by_code, topic_interest, unmatched_preferences, top_n=5, client=None, max_retries=3):
+def judge_and_explain(original_query, narrowed_codes, courses_by_code, topic_interest, unmatched_preferences, top_n=5, client=None, max_retries=3, offered_codes=None):
     with_data = []
     unverified = []
     for code in narrowed_codes:
@@ -60,10 +60,13 @@ def judge_and_explain(original_query, narrowed_codes, courses_by_code, topic_int
         else:
             unverified.append(code)
 
-    unverified_candidates = [
-        {"course_code": code, "note": "Technically eligible for this category, but no handout was found for it - it may not be offered this semester, or wasn't included in the supplied handout set. Title, description, and evaluation scheme could not be verified."}
-        for code in unverified
-    ]
+    unverified_candidates = []
+    for code in unverified:
+        if offered_codes and code in offered_codes:
+            note = ("Confirmed offered this semester (per the timetable), but no handout was included in the supplied dataset - title, description, and evaluation scheme could not be verified.")
+        else:
+            note = ("Technically eligible for this category, but not found in this semester's timetable - likely not actually offered this semester.")
+        unverified_candidates.append({"course_code": code, "note": note})
 
     if not with_data:
         return {"recommendations": [], "unverified_candidates": unverified_candidates}
