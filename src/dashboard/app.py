@@ -7,7 +7,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 import json
 import streamlit as st
 
-from src.models.student_profile import StudentProfile
+from src.models.student_profile import StudentProfile, semester_to_year_position
 from src.engine.requirement_engine import build_eligible_course_set
 from src.llm.query_parser import parse_query
 from src.llm.narrowing import narrow_candidates
@@ -38,6 +38,8 @@ with st.sidebar:
     programme_name = st.selectbox("Programme", programme_names)
     current_semester = st.number_input("Current semester", min_value=1, max_value=8, value=1)
     completed_courses_raw = st.text_area("Completed courses (comma-separated course codes)")
+    current_courses_raw = st.text_area("Currently registered courses (comma-separated course codes)")
+    interests_raw = st.text_area("General academic interests (comma-separated, optional)")
     build_profile = st.button("Save profile")
 
 if "profile" not in st.session_state:
@@ -47,9 +49,12 @@ if "messages" not in st.session_state:
 
 if build_profile:
     completed_courses = [c.strip() for c in completed_courses_raw.split(",") if c.strip()]
+    current_courses = [c.strip() for c in current_courses_raw.split(",") if c.strip()]
+    interests = [c.strip() for c in interests_raw.split(",") if c.strip()]
     st.session_state.profile = StudentProfile(
         campus="Pilani", programme_name=programme_name, admission_year=2023,
         current_semester=current_semester, completed_courses=completed_courses,
+        current_courses=current_courses, interests=interests,
     )
     st.session_state.messages = []
     st.sidebar.success("Profile saved. Ask a question below.")
@@ -73,6 +78,8 @@ else:
                 programme_record = next(p for p in programmes if p["programme_name"] == profile.programme_name)
 
                 parsed = parse_query(query)
+                if not parsed.get("topic_interest") and profile.interests:
+                    parsed["topic_interest"] = ", ".join(profile.interests)
                 result = build_eligible_course_set(
                     profile.programme_name, profile, programme_record, course_pools, offered_codes
                 )
@@ -116,6 +123,15 @@ else:
                                       f"semester's timetable).*")
 
                     response_text = "\n".join(lines)
+
+                year_roman, _ = semester_to_year_position(profile.current_semester)
+                if year_roman == "IV" and not result["eligible_named_courses"]:
+                    response_text += (
+                        "\n\n*Note: Year IV is governed by the Practice School/Thesis process, "
+                        "not a fixed named-course list, so this system doesn't track named-course "
+                        "eligibility for Year IV - see regulations.json's practice_school_thesis_rule "
+                        "for the actual policy.*"
+                    )
 
             st.markdown(response_text)
             st.session_state.messages.append({"role": "assistant", "content": response_text})
