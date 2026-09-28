@@ -137,7 +137,10 @@ def compute_requirement_status(programme_name, student_profile, programme_record
     completed_set = set(student_profile.completed_courses)
     all_named_codes = {code for group in named_groups for code in group["codes"]}
 
-    remaining_named_groups = [g for g in named_groups if not any(c in completed_set for c in g["codes"])]
+    remaining_named_groups = [
+        g for g in named_groups
+        if not any(code_matches_any(c, completed_set, equivalence_map) for c in g["codes"])
+    ]
 
     elective_candidate_courses = [c for c in student_profile.completed_courses if not code_matches_any(c, all_named_codes, equivalence_map)]
     categorized = [
@@ -163,12 +166,18 @@ def build_eligible_course_set(programme_name, student_profile, programme_record,
     current_set = set(student_profile.current_courses)
     all_named_codes = {code for group in named_groups for code in group["codes"]}
 
-    remaining_named_groups = [g for g in named_groups if not any(c in completed_set for c in g["codes"])]
+    remaining_named_groups = [
+        g for g in named_groups
+        if not any(code_matches_any(c, completed_set, equivalence_map) for c in g["codes"])
+    ]
     eligible_named_groups = filter_eligible_named_groups(remaining_named_groups)
 
-    elective_candidate_courses = [c for c in student_profile.completed_courses if c not in all_named_codes]
+    elective_candidate_courses = [
+        c for c in student_profile.completed_courses
+        if not code_matches_any(c, all_named_codes, equivalence_map)
+    ]
     categorized = [
-        categorize_completed_course(c, programme_name, all_named_codes, course_pools)
+        categorize_completed_course(c, programme_name, all_named_codes, course_pools, equivalence_map)
         for c in elective_candidate_courses
     ]
     completed_by_category, remaining_electives = allocate_elective_completions(categorized, elective_required_counts)
