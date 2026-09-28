@@ -38,6 +38,7 @@ streamlit run src/dashboard/app.py
 
 Set up a profile in the sidebar (programme, current semester, completed courses, currently registered courses, and optional general interests), then ask a question in the chat, e.g. "Suggest a HUEL related to environment" or "I want a DEL, no midsem preferred."
 
+
 ## How it works
 
 1. **Deterministic pre-processing** (`src/preprocessing/`) parses the four source PDFs (handouts, bulletin, timetable, regulations) into structured JSON. Section/page locations are found dynamically by scanning for real marker text, not hardcoded, so new semester data can be dropped in without code changes.
@@ -60,3 +61,5 @@ Set up a profile in the sidebar (programme, current semester, completed courses,
 ## Testing
 
 No automated test suite. Every parser was validated by running it against the full real dataset and checking coverage/counts (see print statements in each `parse_*.py` driver script), and the dashboard was smoke-tested manually with real profiles and queries.
+
+## Remark: Used AI for some parts of code, and for finalizing the doc, due to time constraints, the project turned out to be far more large and comprehensive then I originally estimated and I am sorry for that.
