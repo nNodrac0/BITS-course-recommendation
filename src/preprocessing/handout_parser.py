@@ -29,7 +29,7 @@ UNNUMBERED_HEADING_PATTERN = re.compile(
 
 COURSE_CODE_PATTERN = r"[A-Z]{2,6}\s*[A-Z]\s*\d{3}T?"
 
-HIGHER_DEGREE_CODE_PATTERN = re.compile(r"[A-Z]+\s*G\d{3}T?")
+OUT_OF_SCOPE_CODE_PATTERN = re.compile(r"[A-Z]+\s*[GUEC]\d{3}T?")
 
 INSTRUCTOR_LABEL_PATTERN = re.compile(r"Instructor[\s-]+in[\s-]+Charge", re.IGNORECASE)
 
@@ -199,7 +199,7 @@ class HandoutRecord:
     attendance_policy: Optional[str]
     makeup_policy: Optional[str]
     grading_policy: Optional[str]
-    is_higher_degree: bool
+    is_out_of_scope: bool
     evaluation_scheme: list = field(default_factory=list)
     unverified_fields: list = field(default_factory=list)
     source_file: str = ""
@@ -228,7 +228,7 @@ def parse_single_handout(path):
     if instructor is None:
         unverified.append("instructor_in_charge")
 
-    is_higher_degree = bool(course_code and HIGHER_DEGREE_CODE_PATTERN.fullmatch(course_code))
+    is_out_of_scope = bool(course_code and OUT_OF_SCOPE_CODE_PATTERN.fullmatch(course_code))
 
     return HandoutRecord(
         course_code=course_code,
@@ -238,7 +238,7 @@ def parse_single_handout(path):
         attendance_policy=sections["attendance_policy"],
         makeup_policy=sections["makeup_policy"],
         grading_policy=sections["grading_policy"],
-        is_higher_degree=is_higher_degree,
+        is_out_of_scope=is_out_of_scope,
         evaluation_scheme=evaluation_scheme,
         unverified_fields=unverified,
         source_file=os.path.basename(path),

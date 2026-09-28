@@ -43,8 +43,8 @@ def main():
         confirmed = sum(1 for r in records if field_name not in r["unverified_fields"])
         print(f"  {field_name}: {confirmed}/{n} = {confirmed/n*100:.1f}%")
 
-    higher_degree = sum(1 for r in records if r["is_higher_degree"])
-    print(f"\nHigher-degree (G-series) handouts: {higher_degree}/{n}")
+    out_of_scope = sum(1 for r in records if r["is_out_of_scope"])
+    print(f"\nOut-of-scope (G/U/E/C-series) handouts: {out_of_scope}/{n}")
 
 
 if __name__ == "__main__":
