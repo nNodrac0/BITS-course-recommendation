@@ -29,6 +29,10 @@ def main():
     sections = find_pool_sections(full_text)
     print(f"Programme sections found: {len(sections)}")
 
+    untranslated = [s["pool_header_name"] for s in sections if "no_translation_found" in s["flags"]]
+    if untranslated:
+        print(f"WARNING - no translation found for: {untranslated}")
+
     discipline_pools = build_discipline_elective_pools(full_text, sections)
     humanities_pool = extract_humanities_pool(full_text)
 

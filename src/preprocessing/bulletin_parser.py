@@ -155,6 +155,37 @@ POOL_HEADER_PATTERN = re.compile(
     r"((?:[A-Z][A-Z&,\-\u2013]*|\u2013)(?:\s+(?:[A-Z][A-Z&,\-\u2013]*|\u2013))*)\s*$"
 )
 
+#Need to add this dict because many names mismatch
+POOL_HEADER_TO_PROGRAMME_NAME = {
+    "ARCHITECTURAL AND URBAN ENGINEERING": "B.E. Architecture and Urban Engineering",
+    "BIOTECHNOLOGY": "B.E. Biotechnology",
+    "BIOTECHNOLOGY WITH SPECIALIZATION IN APPLIED MOLECULAR BIOLOGY": "B.E. Biotechnology with Specialization in Applied Molecular Biology",
+    "CHEMICAL ENGINEERING": "B.E. Chemical",
+    "CHEMICAL ENGINEERING WITH SPECIALIZATION IN ENERGY, ENVIRONMENT, AND SUSTAINABILITY": "B.E. Chemical with Specialization in Energy, Environment, and Sustainability",
+    "CIVIL ENGINEERING": "B.E. Civil",
+    "COMPUTER SCIENCE": "B. E. Computer Science",
+    "ELECTRICAL AND ELECTRONICS ENGINEERING": "B.E. Electrical & Electronics",
+    "ELECTRONICS AND COMMUNICATION ENGINEERING": "B.E. Electronics & Communication",
+    "ELECTRONICS AND COMPUTER ENGINEERING": "B.E. Electronics & Computer Engineering",
+    "ELECTRONICS AND INSTRUMENTATION ENGINEERING": "B.E. Electronics and Instrumentation",
+    "ENVIRONMENTAL AND SUSTAINABILITY ENGINEERING": "B.E. Environmental and Sustainability Engineering",
+    "MANUFACTURING ENGINEERING": "B.E. Manufacturing",
+    "MATHEMATICS AND COMPUTING": "B.E. Mathematics and Computing",
+    "MECHANICAL ENGINEERING": "B.E. Mechanical",
+    "MECHANICAL ENGINEERING WITH SPECIALIZATION IN AEROSPACE": "B.E. Mechanical with Specialization in Aerospace",
+    "PHARMACY": "B. Pharm.",
+    "BIOLOGICAL SCIENCES": "M.Sc. Biological Sciences",
+    "CHEMISTRY": "M.Sc. Chemistry",
+    "ECONOMICS": "M. Sc. Economics",
+    "MATHEMATICS": "M.Sc. Mathematics",
+    "PHYSICS": "M. Sc. Physics",
+    "PHYSICS WITH SPECIALIZATION IN SPACE SCIENCE AND TECHNOLOGY": "M. Sc. Physics specialization in Space Science and Technology",
+    "ROBOTICS AND INDUSTRIAL AUTOMATION": "B.E. Robotics & Industrial Automation",
+    "GENERAL STUDIES \u2013 COMMUNICATION AND MEDIA STUDIES": "M.Sc. General Studies \u2013 Communication and Media Studies",
+    "GENERAL STUDIES \u2013 DEVELOPMENT STUDIES": "M.Sc. General Studies \u2013 Development Studies",
+    "SEMICONDUCTOR AND NANOSCIENCE": "M.Sc. Semiconductor and Nanoscience",
+    "BBA (Honours)": "Bachelor of Business Administration (Honours)",
+}
 
 def find_pool_section_range(pdf_path, search_start=300, search_end=345):
     doc = fitz.open(pdf_path)
@@ -175,15 +206,22 @@ def find_pool_sections(full_text):
     for m in CORE_COURSES_MARKER.finditer(full_text):
         preceding_text = full_text[:m.start()]
         header_match = POOL_HEADER_PATTERN.search(preceding_text)
-        programme_name = None
+        pool_header_name = None
         if header_match:
-            programme_name = re.sub(r"\s+(PROGRAMME|STREAM)$", "", header_match.group(1).strip())
+            pool_header_name = re.sub(r"\s+(PROGRAMME|STREAM)$", "", header_match.group(1).strip())
         flags = []
-        if programme_name is None:
-            programme_name = "BBA (Honours)"
+        if pool_header_name is None:
+            pool_header_name = "BBA (Honours)"
             flags.append("name_inferred_by_elimination")
+
+        programme_name = POOL_HEADER_TO_PROGRAMME_NAME.get(pool_header_name)
+        if programme_name is None:
+            programme_name = pool_header_name
+            flags.append("no_translation_found")
+
         sections.append({
             "programme_name": programme_name,
+            "pool_header_name": pool_header_name,
             "core_courses_start": m.end(),
             "flags": flags,
         })
