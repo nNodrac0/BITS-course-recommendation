@@ -1,0 +1,154 @@
+{
+  "source": "Academic-Regulations-2023.pdf, hand-encoded from direct reading, not regex-parsed - guessing rule meaning from free-text prose is exactly what the brief warns against.",
+  "note_on_terminology": "CDC/DEL/HUEL/OPEL are bulletin/campus shorthand, not terms these regulations define. Confirmed by their absence: clauses 2.04-2.06 spell out 'Discipline-specific Core courses', 'Discipline Electives', 'Humanities Electives', 'Open Electives' in full, never the abbreviations.",
+
+  "elective_categories": {
+    "named_courses": {
+      "regulation_clause": "2.04",
+      "source_page": 9,
+      "description": "For first degree students, named courses include all mandatory courses under the General Institutional Requirement and the Discipline-specific Core courses for the programme(s)."
+    },
+    "discipline_elective": {
+      "regulation_clause": "2.04",
+      "source_page": 9
+    },
+    "humanities_elective": {
+      "regulation_clause": "2.04",
+      "source_page": 9
+    },
+    "open_elective": {
+      "regulation_clause": "2.04-2.05",
+      "source_page": [9, 10],
+      "description": "Courses that are not part of the discipline requirement nor part of the Humanities requirement."
+    }
+  },
+
+  "elective_substitution_rule": {
+    "regulation_clause": "2.06",
+    "source_page": 10,
+    "description": "Normally any elective course will be treated as an Open Elective once the student's requirements under Discipline Electives and Humanities Electives have been accounted for.",
+    "dual_degree_note": "Open elective requirement of dual degree students is met by counting the Discipline Electives of one degree as Open Electives of the other degree - stated directly at clause 2.06, a cleaner one-line statement of the same rule 7.11-7.12 describe in more detail for the composite programme."
+  },
+
+  "higher_degree_elective_option": {
+    "regulation_clause": "2.06-2.08",
+    "source_page": [10, 11],
+    "description": "A first degree student above a particular CGPA (set by AGC) may register in at most one higher-degree course per semester, counted as Open Elective unless it happens to be listed in their own programme's Discipline Elective pool.",
+    "engine_relevance": "This is why higher-degree (G-series) handout course codes are NOT included in this project's default Open Elective candidate pool - the CGPA gate can't be checked (student profile doesn't collect CGPA), so the safe default is exclusion, not silent inclusion."
+  },
+
+  "prerequisite_policy": {
+    "regulation_clause": "3.12-3.18",
+    "source_page": [15, 16],
+    "default_rule": "positional, but three distinct cases - not one blanket rule",
+    "cases": {
+      "ps_1": {
+        "regulation_clause": "3.14(i)",
+        "description": "Prior preparation for PS-I = normally all courses in the semesters preceding PS-I for the student's programme or composite programme."
+      },
+      "ps_2_or_ts": {
+        "regulation_clause": "3.14(ii)",
+        "description": "Prior preparation for PS-II/Thesis = ALL named courses of the programme or composite programme, including PS-I, other than TS/PS-II itself. This is broader than 'preceding semesters' - it means the entire named-course list, not just what came before."
+      },
+      "any_other_semester": {
+        "regulation_clause": "3.14(iii)",
+        "description": "For any other prescribed semester, prior preparation = all named courses in semesters and terms preceding this set of courses. This is the case the requirement engine's positional gating actually implements."
+      }
+    },
+    "dca_flexibility": {
+      "regulation_clause": "3.14",
+      "max_uncleared_courses": 2,
+      "condition": "The uncleared courses must have no direct bearing on Core courses. DCA may recommend a modified semester-wise pattern; finalization is at the discretion of Dean, AUGS/AGSR.",
+      "implemented": false
+    },
+    "known_gap": "No course-to-course pairwise prerequisite list (e.g. 'course X requires course Y') found anywhere in the supplied dataset - checked in these regulations, the bulletin's course-pool section, and the timetable's own dedicated 'Prerequisites/Restrictions' section (which turned out to be a stub pointing to an external website, not data). Positional prerequisite enforcement per the three cases above is the only rule implemented."
+  },
+
+  "practice_school_thesis_rule": {
+    "regulation_clause": "6.02-6.25",
+    "source_page": [32, 39],
+    "options": {
+      "ps_i_ps_ii": {
+        "description": "PS-I (5 units) then PS-II (20 units). PS-I normally after prior preparation from the semester-wise pattern; PS-II only after all named courses (including PS-I) of the programme are cleared.",
+        "regulation_clause": "6.04"
+      },
+      "thesis_16_units": {
+        "description": "16-unit Thesis, full semester duration. Student cannot be simultaneously registered in any other course.",
+        "regulation_clause": "6.16(c)(i)"
+      },
+      "thesis_9_units": {
+        "description": "9-unit Thesis with concurrent coursework (at most 3 courses, at most 9 units total, normally accounted under Open Electives).",
+        "regulation_clause": "6.16(c)(ii), 6.16(e)"
+      }
+    },
+    "modified_open_elective_requirement": {
+      "regulation_clause": "6.16(d)",
+      "single_degree_9_unit_thesis": "At least 2 additional elective courses (at least 6 units) - modified Open Elective requirement becomes at least 7 courses / at least 21 units. A completed PS-I's units may count toward this.",
+      "dual_degree_one_9_unit_thesis": "Modified Open Elective requirement (>=7 courses / >=21 units) is deemed satisfied if the combined Discipline Electives from both programmes already exceed that threshold; otherwise additional electives are needed.",
+      "dual_degree_both_9_unit_thesis": "Modified requirement becomes >=9 courses / >=27 units, satisfiable by combined Discipline Electives from both programmes plus a completed PS-I if applicable."
+    },
+    "implemented_for": "single degree only - dual degree logic documented here, not yet built into the engine"
+  },
+
+  "minor_program_rules": {
+    "regulation_clause": "7.36-7.37",
+    "source_page": [46, 47],
+    "max_minors": 1,
+    "declaration_deadline": "End of 2nd year (later declaration may delay the minor's award, subject to course availability)",
+    "requirement": "Each minor defines its own minimum courses/units, a set of mandatory core courses, and an elective pool. At most 1 project/seminar-type course may count toward a minor's elective requirement.",
+    "overlap_rule": {
+      "regulation_clause": "7.37",
+      "major_course_overlap_cap": "At most 2 courses AND at most 6 units (out of the minor's 5-course/15-unit requirement) may be met by the student's major's mandatory courses - specifically General Institutional Requirement excluding Humanities, or (Major) Discipline Core(s).",
+      "elective_overlap": "No cap - major electives (discipline/open/humanities) may overlap freely with minor elective requirements.",
+      "no_double_counting": "No course may satisfy two different minors, nor may a course satisfy two majors and a minor simultaneously."
+    },
+    "minor_certificate_eligibility": {
+      "regulation_clause": "9.01 (attached directly after the main graduation clause, not a separate numbered clause)",
+      "source_page": 58,
+      "conditions": [
+        "Completed the core courses required for the minor and the stipulated number of electives from that minor's pool.",
+        "Minimum CGPA of 4.50 in the courses applied toward the minor."
+      ],
+      "issued_only_after": "A minor certificate is issued only on completion of the major degree - a student can graduate without a minor, but not with only a minor."
+    },
+    "implemented": "documented only - student profile has a minor field, but the engine doesn't consume it yet"
+  },
+
+  "graduation_eligibility": {
+    "regulation_clause": "9.01",
+    "source_page": 58,
+    "conditions": [
+      "Cleared all courses prescribed for the programme or composite programme.",
+      "Cleared total unit requirements of Thesis, Seminar and Dissertation wherever applicable.",
+      "Minimum CGPA 4.50 (first degree) or 5.50 (higher degree, unless stated otherwise for a particular programme).",
+      "Remained outside the purview of the Academic Counselling Board (ACB), or declared outside its purview.",
+      "Overcome all consequential stipulations of any NC report - EXCEPT an NC in an elective course beyond the prescribed number of electives, or in a course that has ceased to be part of the student's current programme after a transfer.",
+      "Satisfied all other requirements of these regulations."
+    ],
+    "checkable_from_supplied_data": ["named courses cleared", "elective counts", "Thesis/PS units"],
+    "not_checkable_from_supplied_data": ["CGPA", "ACB status", "NC report history"]
+  },
+
+  "dual_degree": {
+    "eligibility_gating": {
+      "regulation_clause": "2.02-2.03",
+      "source_page": [9],
+      "description": "Which programme pairs are eligible for dual degree is NOT defined in these regulations - it's explicitly deferred to 'Groups of programmes... notified in the bulletin as per periodic decision of the Senate' (clause 2.03). No separate abstract 'Groups' table was found; the operational definition used by this project is: a combination is valid if and only if the bulletin publishes a named composite semester-wise pattern for it."
+    },
+    "composite_programme_principles": {
+      "regulation_clause": "7.10-7.19",
+      "source_page": [38, 42],
+      "gir_counted_once": "General Institutional Requirement is shared, not duplicated per degree.",
+      "discipline_requirements": "Met separately per degree, except courses common to both (or marked equivalent), which need be completed only once.",
+      "no_double_dipping": "A Discipline Core course of one degree cannot count as a Discipline Elective of the other; no course counts as Discipline Elective in two disciplines.",
+      "open_elective_subsumed": "See elective_substitution_rule.dual_degree_note above - stated at both 2.06 and 7.11.",
+      "ps_thesis_choice": "Exactly one of: 2 PS-II courses, 2 Thesis courses, or 1 PS-II + 1 Thesis. Choice expressed after completing PS-I, within one semester; Dean PS decides if the student doesn't.",
+      "all_or_nothing_graduation": "The composite programme can't be completed separately per degree - completing it fulfils both degrees at once, same division/class awarded to both."
+    },
+    "restrictions": {
+      "regulation_clause": "7.16-7.17",
+      "no_dropping_first_degree": "A dual degree student cannot drop the first degree and keep only the second.",
+      "withdrawal": "Reverts the student to their first single degree, subject to current structure and regulations."
+    }
+  }
+}
