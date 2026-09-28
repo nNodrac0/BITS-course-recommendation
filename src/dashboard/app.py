@@ -22,12 +22,13 @@ def load_data():
         course_pools = json.load(f)
     with open(PROJECT_ROOT / "data/processed/handouts.json", encoding="utf-8") as f:
         handouts = json.load(f)
-    handout_codes = {h["course_code"] for h in handouts if h["course_code"] and not h["is_out_of_scope"]}
+    with open(PROJECT_ROOT / "data/processed/offered_courses.json", encoding="utf-8") as f:
+        offered_codes = set(json.load(f))
     courses_by_code = {h["course_code"]: h for h in handouts if h["course_code"]}
-    return programmes, course_pools, handout_codes, courses_by_code
+    return programmes, course_pools, offered_codes, courses_by_code
 
 
-programmes, course_pools, handout_codes, courses_by_code = load_data()
+programmes, course_pools, offered_codes, courses_by_code = load_data()
 programme_names = [p["programme_name"] for p in programmes]
 
 st.title("BITS Course Recommender")
@@ -73,7 +74,7 @@ else:
 
                 parsed = parse_query(query)
                 result = build_eligible_course_set(
-                    profile.programme_name, profile, programme_record, course_pools, handout_codes
+                    profile.programme_name, profile, programme_record, course_pools, offered_codes
                 )
 
                 category = parsed["category"]
@@ -94,6 +95,7 @@ else:
                     final = judge_and_explain(
                         query, narrowed, courses_by_code,
                         parsed["topic_interest"], parsed["unmatched_preferences"],
+                        offered_codes=offered_codes,
                     )
 
                     lines = [f"**Category:** {category.replace('_', ' ').title()}\n"]
@@ -106,8 +108,12 @@ else:
                         lines.append("No courses with enough data to confidently recommend were found.")
 
                     if final.get("unverified_candidates"):
+                        confirmed_offered = sum(1 for c in final["unverified_candidates"] if "Confirmed offered" in c["note"])
+                        not_offered = len(final["unverified_candidates"]) - confirmed_offered
                         lines.append(f"\n*{len(final['unverified_candidates'])} more courses are eligible for this "
-                                      f"category but have no handout data (may not be offered this semester).*")
+                                      f"category without enough data to rank ({confirmed_offered} confirmed offered "
+                                      f"this semester but missing a handout, {not_offered} not found in this "
+                                      f"semester's timetable).*")
 
                     response_text = "\n".join(lines)
 
@@ -119,5 +125,5 @@ else:
             programme_record = next(p for p in programmes if p["programme_name"] == st.session_state.profile.programme_name)
             st.json(build_eligible_course_set(
                 st.session_state.profile.programme_name, st.session_state.profile,
-                programme_record, course_pools, handout_codes,
+                programme_record, course_pools, offered_codes,
             ))

@@ -155,7 +155,7 @@ def compute_requirement_status(programme_name, student_profile, programme_record
     }
 
 
-def build_eligible_course_set(programme_name, student_profile, programme_record, course_pools, handout_codes, equivalence_map=None):
+def build_eligible_course_set(programme_name, student_profile, programme_record, course_pools, offered_codes, equivalence_map=None):
     named_groups = collect_named_course_groups(programme_record)
     _, elective_required_counts = collect_named_courses_and_elective_requirements(programme_record)
 
@@ -183,10 +183,10 @@ def build_eligible_course_set(programme_name, student_profile, programme_record,
     if remaining_electives.get("humanities_elective", 0) > 0:
         elective_candidates["humanities_elective"] = sorted(humanities_pool - unavailable)
     if remaining_electives.get("open_elective", 0) > 0:
-        open_pool = handout_codes - discipline_pool - humanities_pool
+        open_pool = offered_codes - discipline_pool - humanities_pool
         elective_candidates["open_elective"] = sorted(open_pool - unavailable)
     if remaining_electives.get("open_or_humanities_elective", 0) > 0:
-        flex_pool = humanities_pool | (handout_codes - discipline_pool - humanities_pool)
+        flex_pool = humanities_pool | (offered_codes - discipline_pool - humanities_pool)
         elective_candidates["open_or_humanities_elective"] = sorted(flex_pool - unavailable)
 
     return {
